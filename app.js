@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 dotenv.config();
 import { Telegraf } from "telegraf";
 import getOutOfStockProducts from "./utilities/getOutOfStockProducts.js";
-import createPdfFile from "./utilities/createPdfFile.js";
 import cron from "node-cron";
 import Product from "./models/Product.js";
 import mongoose from "mongoose";
@@ -98,14 +97,5 @@ cron.schedule('1 0-23 * * *', async () => {
         console.log(err);
     }
 });
-bot.command("pdf_list", async ctx => {
-    try {
-        const products = await getOutOfStockProducts();
-        const filename = createPdfFile(products);
-        ctx.telegram.sendDocument(ctx.from.id, { filename });
-    } catch (err) {
-        console.log(err);
-        ctx.reply("Please Try again")
-    }
-})
+
 bot.launch()
