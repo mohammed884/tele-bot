@@ -16,17 +16,16 @@ const getOutOfStockProducts = async () => {
             const isDup = await Product.findOne({ title: product.title });
             if (!isDup) {
                 if (product.types && product.types.length > 0) {
+                    console.log("Product with types");
                     let emptyTypes = "";
-                    for (let j = 0; j < product.types.length; j++) {
-                        const type = product.types[j];
-                        if (type.stock < 1) emptyTypes += `\n ${type[j].value}`;
-                    }
+                    product.types.forEach(type => {
+                        if (type.stock < 1) emptyTypes += `\n ${type.value}`;
+                    })
                     outOfStockProducts.push({
                         title: product.title,
                         emptyTypes,
                         image: `https://ardunic-images.s3.eu-central-1.amazonaws.com/${product.images[0]}`,
                     })
-                    // emptyTypes = ""
                 }
                 else if (product.stock < 1) {
                     outOfStockProducts.push({

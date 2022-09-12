@@ -96,27 +96,24 @@ cron.schedule('1 0-23 * * *', async () => {
         let index = 0;
         const senderInterval = setInterval(async () => {
             const product = products[index]
-            const isDup = await Product.findOne({ title: product.title });
-            if (!isDup) {
-                const reply = await bot.telegram.sendMessage(CHAT_ID,
-                    !product.emptyTypes
-                        ?
-                        `${product.title}`
-                        :
-                        `
+            const reply = await bot.telegram.sendMessage(CHAT_ID,
+                !product.emptyTypes
+                    ?
+                    product.title
+                    :
+                    `
                         ${product.title}
                         \n empty types 
                         ${product.emptyTypes} 
                     `
-                );
-                bot.telegram.sendPhoto(CHAT_ID, product.image, {
-                    reply_to_message_id: reply.message_id
-                })
-                await Product.create({
-                    title: product.title,
-                    messageId: reply.message_id,
-                })
-            }
+            );
+            bot.telegram.sendPhoto(CHAT_ID, product.image, {
+                reply_to_message_id: reply.message_id
+            })
+            await Product.create({
+                title: product.title,
+                messageId: reply.message_id,
+            })
             index++;
             if (index > products.length) clearInterval(senderInterval)
         }, SECONDS);
