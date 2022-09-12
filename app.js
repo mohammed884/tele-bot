@@ -39,34 +39,31 @@ bot.help(ctx => {
 bot.command("get", async ctx => {
     try {
         ctx.reply("Please Wait ...");
-        const SECONDS = 1000 * 20;
+        const SECONDS = 1000 * 5;
         const products = await getOutOfStockProducts();
         ctx.reply(`Total (${products.length})`);
         let index = 0;
         const senderInterval = setInterval(async () => {
             const product = products[index]
-            const isDup = await Product.findOne({ title: product.title });
-            if (!isDup) {
-                const reply = await ctx.reply(
-                    !product.emptyTypes
-                        ?
-                        `${product.title}`
-                        :
-                        `
+            const reply = await ctx.reply(
+                !product.emptyTypes
+                    ?
+                    product.title
+                    :
+                    `
                         ${product.title}
                         \n empty types 
                         ${product.emptyTypes} 
-                        `
+                    `
 
-                );
-                await ctx.replyWithPhoto(product.image, {
-                    reply_to_message_id: reply.message_id
-                });
-                await Product.create({
-                    title: product.title,
-                    messageId: reply.message_id,
-                })
-            }
+            );
+            await ctx.replyWithPhoto(product.image, {
+                reply_to_message_id: reply.message_id
+            });
+            await Product.create({
+                title: product.title,
+                messageId: reply.message_id,
+            })
             index++;
             if (index > products.length) clearInterval(senderInterval)
         }, SECONDS);
