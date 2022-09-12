@@ -39,7 +39,7 @@ bot.help(ctx => {
 bot.command("get", async ctx => {
     try {
         ctx.reply("Please Wait ...");
-        const SECONDS = 1000 * 5;
+        const SECONDS = 1000 * 15;
         const products = await getOutOfStockProducts();
         ctx.reply(`Total (${products.length})`);
         let index = 0;
@@ -91,7 +91,7 @@ bot.command("delete", async ctx => {
 cron.schedule('1 0-23 * * *', async () => {
     try {
         const products = await getOutOfStockProducts();
-        const SECONDS = 1000 * 20;
+        const SECONDS = 1000 * 15;
         bot.telegram.sendMessage(CHAT_ID, `Total ${products.length}`)
         let index = 0;
         const senderInterval = setInterval(async () => {
