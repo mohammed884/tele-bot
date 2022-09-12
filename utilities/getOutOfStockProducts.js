@@ -13,9 +13,21 @@ const getOutOfStockProducts = async () => {
         const outOfStockProducts = []
         for (let i = 0; i < data.length; i++) {
             const product = data[i];
-            if (product.stock < 1) {
-                const isDup = await Product.findOne({ title: product.title });
-                if (!isDup) outOfStockProducts.push({
+            if (product.types && product.types.length > 0) {
+                let emptyTypes = "";
+                for (let j = 0; j < product.types.length; j++) {
+                    const type = product.types[j];
+                    if (type.stock < 1 ) emptyTypes += `\n ${type[j].value}`;
+                }
+                outOfStockProducts.push({
+                    title: product.title,
+                    emptyTypes,
+                    image: `https://ardunic-images.s3.eu-central-1.amazonaws.com/${product.images[0]}`,
+                })
+                // emptyTypes = ""
+            }
+            else if (product.stock < 1) {
+                outOfStockProducts.push({
                     title: product.title,
                     image: `https://ardunic-images.s3.eu-central-1.amazonaws.com/${product.images[0]}`
                 })
