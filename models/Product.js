@@ -7,7 +7,7 @@ const Schema = mongoose.Schema({
     messageId: {
         type: Number,
         required: true,
-    }
+    },
 });
 const Product = new mongoose.model("products", Schema);
 export default Product
