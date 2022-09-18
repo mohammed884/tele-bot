@@ -8,7 +8,7 @@ import mongoose from "mongoose";
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
 const bot = new Telegraf(BOT_TOKEN);
-mongoose.connect("mongodb://localhost:27017/ardunic-bot", {
+mongoose.connect("mongodb://127.0.0.1:27017/ardunic-bot", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });
@@ -17,8 +17,6 @@ bot.start(async ctx => {
     try {
         if (ctx.chat.id !== Number(CHAT_ID)) return ctx.reply("Unauthorized")
         ctx.reply(`Hello There 
-            \nYou can perform theses commands 
-            \n/get to get the out of stock products
             \n/delete to delete the message by the product title
         `)
     } catch (err) {
@@ -30,52 +28,13 @@ bot.help(ctx => {
     try {
         console.log(ctx.chat.id);
         ctx.reply(`
-            You can perform theses commands 
-            \n /get
-            \n /delete to delete the message by id
+            \n/delete to delete the message by id
         `)
     } catch (err) {
         console.log(err);
         ctx.reply("Please Try Again")
     }
 });
-// bot.command("get", async ctx => {
-//     try {
-//         if (ctx.chat.id !== Number(CHAT_ID)) return ctx.reply("Unauthorized")
-//         ctx.reply("Please Wait ...");
-//         const SECONDS = 1000 * 15;
-//         const products = await getOutOfStockProducts();
-//         ctx.reply(`Total (${products.length})`);
-//         let index = 0;
-//         const senderInterval = setInterval(async () => {
-//             const product = products[index]
-//             const reply = await ctx.reply(
-//                 !product.emptyTypes
-//                     ?
-//                     product.title
-//                     :
-//                     `
-//                         ${product.title}
-//                         \n empty types 
-//                         ${product.emptyTypes} 
-//                     `
-
-//             );
-//             await ctx.replyWithPhoto(product.image, {
-//                 reply_to_message_id: reply.message_id
-//             });
-//             await Product.create({
-//                 title: product.title,
-//                 messageId: reply.message_id,
-//             })
-//             index++;
-//             if (index > products.length) clearInterval(senderInterval)
-//         }, SECONDS);
-//     } catch (err) {
-//         console.log(err);
-//         ctx.reply("Please Try again")
-//     }
-// });
 
 bot.command("delete", async ctx => {
     try {
@@ -93,7 +52,7 @@ bot.command("delete", async ctx => {
         ctx.deleteMessage(ctx.message.message_id);
     }
 });
-cron.schedule('59 0-23 * * *', async () => {
+cron.schedule('0 */5 * * *', async () => {
     try {
         const products = await getOutOfStockProducts();
         const SECONDS = 1000 * 15;
@@ -101,25 +60,28 @@ cron.schedule('59 0-23 * * *', async () => {
         let index = 0;
         const senderInterval = setInterval(async () => {
             if (index > products.length) return clearInterval(senderInterval)
-            const product = products[index]
-            const reply = await bot.telegram.sendMessage(Number(CHAT_ID),
-                !product.emptyTypes
-                    ?
-                    product.title
-                    :
-                    `
-                        ${product.title}
-                        \nempty types 
-                        ${product.emptyTypes} 
-                    `
-            );
-            bot.telegram.sendPhoto(Number(CHAT_ID), product.image, {
-                reply_to_message_id: reply.message_id
-            })
-            await Product.create({
-                title: product.title,
-                messageId: reply.message_id,
-            })
+            const product = products[index];
+            const isDup = await Product.findOne({ title: product.title });
+            if (!isDup) {
+                const reply = await bot.telegram.sendMessage(Number(CHAT_ID),
+                    !product.emptyTypes
+                        ?
+                        product.title
+                        :
+                        `
+                            ${product.title}
+                            \nempty types 
+                            ${product.emptyTypes} 
+                        `
+                );
+                bot.telegram.sendPhoto(Number(CHAT_ID), product.image, {
+                    reply_to_message_id: reply.message_id
+                })
+                await Product.create({
+                    title: product.title,
+                    messageId: reply.message_id,
+                })
+            }
             index++;
         }, SECONDS);
     } catch (err) {
