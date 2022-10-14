@@ -18,6 +18,7 @@ bot.start(async ctx => {
         if (ctx.chat.id !== Number(CHAT_ID)) return ctx.reply("Unauthorized")
         ctx.reply(`Hello There 
             \n/delete to delete the message by the product title
+            \n/cleardb to clear the database
         `)
     } catch (err) {
         console.log(err);
@@ -35,7 +36,15 @@ bot.help(ctx => {
         ctx.reply("Please Try Again")
     }
 });
-
+bot.command("cleardb", async ctx => {
+    try {
+        await Product.deleteMany({})
+        ctx.reply("Database Deleted Successfully")
+    } catch (err) {
+        ctx.reply("Please Try Again")
+        console.log(err);
+    }
+})
 bot.command("delete", async ctx => {
     try {
         if (ctx.chat.id !== Number(CHAT_ID)) return ctx.reply("Unauthorized")
@@ -52,7 +61,7 @@ bot.command("delete", async ctx => {
         ctx.deleteMessage(ctx.message.message_id);
     }
 });
-cron.schedule('0 */5 * * *', async () => {
+cron.schedule('0 */9 * * *', async () => {
     try {
         const products = await getOutOfStockProducts();
         const SECONDS = 1000 * 15;
