@@ -17,8 +17,9 @@ bot.start(async ctx => {
     try {
         if (ctx.chat.id !== Number(CHAT_ID)) return ctx.reply("Unauthorized")
         ctx.reply(`Hello There 
-            \n/delete to delete the message by the product title
-            \n/cleardb to clear the database
+            \n/ordered [product title] To Update the Product Status In The Database
+            \n/delete [product title] To Delete The Message By The Product Title
+            \n/cleardb [product title] To Clear The Database
         `)
     } catch (err) {
         console.log(err);
