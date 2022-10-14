@@ -36,6 +36,20 @@ bot.help(ctx => {
         ctx.reply("Please Try Again")
     }
 });
+bot.command("ordered", async ctx => {
+    try {
+        if (ctx.chat.id !== Number(CHAT_ID)) return ctx.reply("Unauthorized")
+        const title = ctx.message.text.slice(9)
+        const product = await Product.findOne({ title });
+        if (!product) return ctx.reply("There is no such product with that title");
+        product.ordered = true;
+        await product.save();
+        ctx.reply("Product Updated Successfully");
+    } catch (err) {
+        ctx.reply("Please Try Again");
+        console.log(err);
+    }
+})
 bot.command("cleardb", async ctx => {
     try {
         await Product.deleteMany({})
