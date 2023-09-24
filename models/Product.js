@@ -8,7 +8,7 @@ const Schema = mongoose.Schema({
         type: Number,
         required: true,
     },
-    ordered:{
+    isOrdered:{
         type:Boolean,
         default:false,
     }

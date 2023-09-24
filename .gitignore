@@ -1,2 +1,97 @@
 node_modules 
 .env
+const getOutOfStockProducts = async () => {
+    try {
+        const ARDUNIC_API_URL = "https://api.ardunic.com/v1/products?s=300000";
+        const productsRes = await fetch(ARDUNIC_API_URL);
+        const { data } = await productsRes.json();
+        const filtered = data.filter(async product =>(!(await Product.findOne({title:product.slug})) & product.stock < 1));
+        const slugs =  filtered.map(product => product.slug);
+        const outOfStockProducts = [];
+        for (let i = 0; i < filtered.length; i++) {
+            const slug = slugs[i];
+            const product = await fetch(`https://api.ardunic.com/v1/product/${slug}`);
+            const { data } = await product.json();
+            const isDuplicate = await Product.findOne({ title: data.title });
+            let emptyTypes = "";
+            if (!isDuplicate) {
+                //CHECK THE PRODUCT WITH TYPES
+                if (data.types.length > 0) {
+                    data.types.forEach(type => {
+                        if (type.stock < 1) emptyTypes = emptyTypes + `\n ${type.value}`;
+                    })
+                    if (emptyTypes) {
+                        outOfStockProducts.push({
+                            title: data.title,
+                            emptyTypes,
+                            image: `https://ardunic-images.s3.eu-central-1.amazonaws.com/${data.images[0]}`,
+                        })
+                    }
+                }
+                //CHECK THE PRODUCT WITH NO TYPES
+                else {
+                    outOfStockProducts.push({
+                        title: data.title,
+                        image: `https://ardunic-images.s3.eu-central-1.amazonaws.com/${data.images[0]}`,
+                    });
+                }
+            }
+        }
+        console.log(filtered);
+        await Product.deleteMany({isOrdered:true, title:{$nin:outOfStockProducts.map(p => p.title)}})
+        return outOfStockProducts
+    } catch (err) {
+        console.log(err);
+    }
+};
+
+
+
+
+#CONCURET VERSION
+
+# const getOutOfStockProducts = async () => {
+#     try {
+#         const ARDUNIC_API_URL = "https://api.ardunic.com/v1/products?s=300000";
+#         const productsRes = await fetch(ARDUNIC_API_URL);
+#         const { data } = await productsRes.json();
+#         const filtered = data.filter(async product =>(!(await Product.findOne({title:product.slug})) & product.stock < 1));
+#         const slugs =  filtered.map(product => product.slug);
+#         const outOfStockProducts = []
+#         const promises = [];
+#         slugs.forEach(slug => promises.push(fetch(`https://api.ardunic.com/v1/product/${slug}`)))
+#         const products = await Promise.all(promises).then(results => Promise.all(results.map(r => r.json())))
+#         for (let i = 0; i < products.length; i++) {
+#             const product = products[i].data;
+#             const isDuplicate = await Product.findOne({ title: product.title });
+#             let emptyTypes = "";
+#             if (!isDuplicate) {
+#                 //CHECK THE PRODUCT WITH TYPES
+#                 if (product.types.length > 0) {
+#                     product.types.forEach(type => {
+#                         if (type.stock < 1) emptyTypes = emptyTypes + `\n ${type.value}`;
+#                     })
+#                     if (emptyTypes) {
+#                         outOfStockProducts.push({
+#                             title: product.title,
+#                             emptyTypes,
+#                             image: `https://ardunic-images.s3.eu-central-1.amazonaws.com/${product.images[0]}`,
+#                         })
+#                     }
+#                 }
+#                 //CHECK THE PRODUCT WITH NO TYPES
+#                 else {
+#                     outOfStockProducts.push({
+#                         title: product.title,
+#                         image: `https://ardunic-images.s3.eu-central-1.amazonaws.com/${product.images[0]}`,
+#                     });
+#                 }
+#             }
+#         }
+#         await Product.deleteMany({isOrdered:true, title:{$nin:outOfStockProducts.map(p => p.title)}})
+#         console.log(outOfStockProducts);
+#         return outOfStockProducts
+#     } catch (err) {
+#         console.log(err);
+#     }
+# };
