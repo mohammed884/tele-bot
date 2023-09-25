@@ -17,10 +17,14 @@ bot.start(async ctx => {
     try {
         if (ctx.chat.id !== Number(CHAT_ID)) return ctx.reply("Unauthorized")
         ctx.reply(`Hello There 
+<<<<<<< HEAD
             \n/ordered [product title] To Update the Product Status In The Database
             \n/delete [product title] To Delete The Message By The Product Title
             \n/cleardb To Clear The Database
             \n/clearchat To Clear The The Chat
+=======
+            \n/delete to delete the message by the product title
+>>>>>>> f770beb6a78f18db80c153f34b1c484c2c46cf84
         `)
     } catch (err) {
         console.log(err);
@@ -40,6 +44,7 @@ bot.help(ctx => {
         ctx.reply("Please Try Again")
     }
 });
+<<<<<<< HEAD
 bot.command("ordered", async ctx => {
     try {
         if (ctx.chat.id !== Number(CHAT_ID)) return ctx.reply("Unauthorized")
@@ -76,6 +81,9 @@ bot.command("deletedb", async ctx => {
         console.log(err);
     }
 })
+=======
+
+>>>>>>> f770beb6a78f18db80c153f34b1c484c2c46cf84
 bot.command("delete", async ctx => {
     try {
         if (ctx.chat.id !== Number(CHAT_ID)) return ctx.reply("Unauthorized")
@@ -92,8 +100,12 @@ bot.command("delete", async ctx => {
         ctx.deleteMessage(ctx.message.message_id);
     }
 });
+<<<<<<< HEAD
 //'0 0 * * 0' , CRON JOB EVERY 7 DAYS
 cron.schedule('0 0 * * 0', async () => {
+=======
+cron.schedule('0 */5 * * *', async () => {
+>>>>>>> f770beb6a78f18db80c153f34b1c484c2c46cf84
     try {
         const products = await getOutOfStockProducts();
         const SECONDS = 1000 * 40;
