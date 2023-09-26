@@ -8,6 +8,7 @@ import mongoose from "mongoose";
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
 const bot = new Telegraf(BOT_TOKEN);
+mongoose.set("strictQuery", true);
 mongoose.connect("mongodb://127.0.0.1:27017/ardunic-bot-dev", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -68,9 +69,9 @@ bot.command("clearchat", async ctx => {
         
     }
 })
-bot.command("deletedb", async ctx => {
+bot.command("cleardb", async ctx => {
     try {
-        console.log(await Product.deleteMany({}))
+        await Product.deleteMany({})
         ctx.reply("Database Deleted Successfully")
     } catch (err) {
         ctx.reply("Please Try Again")
@@ -94,7 +95,7 @@ bot.command("delete", async ctx => {
     }
 });
 //'0 0 * * 0' , CRON JOB EVERY 7 DAYS
-cron.schedule('0 */5 * * *', async () => {
+cron.schedule('0 0 * * 0', async () => {
     try {
         const products = await getOutOfStockProducts();
         const SECONDS = 1000 * 40;
