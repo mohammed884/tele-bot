@@ -42,6 +42,7 @@ const getOutOfStockProducts = async () => {
                 }
             }
         }
+        console.log(outOfStockProducts.length);
         await Product.deleteMany({isOrdered:true, title:{$nin:outOfStockProducts.map(p => p.title)}})
         return outOfStockProducts
     } catch (err) {

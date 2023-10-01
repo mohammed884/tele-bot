@@ -32,6 +32,7 @@ bot.start(async ctx => {
 bot.help(ctx => {
     try {
         console.log(ctx.chat.id);
+        if (ctx.chat.id !== Number(CHAT_ID)) return ctx.reply("Unauthorized")
         ctx.reply(`Hello There 
             \n/ordered [product title] To Update the Product Status In The Database
             \n/delete [product title] To Delete The Message By The Product Title
@@ -59,6 +60,7 @@ bot.command("ordered", async ctx => {
 })
 bot.command("clearchat", async ctx => {
     try {
+        if (ctx.chat.id !== Number(CHAT_ID)) return ctx.reply("Unauthorized")
         const products = await Product.find({});
         products.forEach(async product => {
             await ctx.deleteMessage(product.messageId);
@@ -71,6 +73,7 @@ bot.command("clearchat", async ctx => {
 })
 bot.command("cleardb", async ctx => {
     try {
+        if (ctx.chat.id !== Number(CHAT_ID)) return ctx.reply("Unauthorized")
         await Product.deleteMany({})
         ctx.reply("Database Deleted Successfully")
     } catch (err) {
@@ -103,7 +106,7 @@ cron.schedule('0 0 * * 0', async () => {
         bot.telegram.sendMessage(Number(CHAT_ID), `Total ${products.length}`)
         let index = 0;
         const senderInterval = setInterval(async () => {
-            if (index > products.length) return clearInterval(senderInterval)
+            if (index >= products.length) return clearInterval(senderInterval)
             const product = products[index];
             const isDup = await Product.findOne({ title: product.title });
             if (isDup) return index++;
